@@ -672,6 +672,11 @@ class NotebookAdapter:
                         logger.info("detected incomplete workflow")
                         self.update_summary(state="incomplete dependency", dependency=repr(e))
                         raise  PapermillWorkflowIncomplete()
+                    
+                    if e.ename == "ModuleNotFoundError":
+                        logger.exception("Could not load module")
+                        self.update_summary(state="incomplete dependency", dependency=repr(e))
+                        raise PapermillWorkflowIncomplete()
 
                 except nbformat.reader.NotJSONError:
                     ntries -= 1
