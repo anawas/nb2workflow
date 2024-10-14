@@ -8,6 +8,7 @@ import nb2workflow.nbadapter as nbadapter
 logger = logging.getLogger(__name__)
 
 import requests
+from requests import Response
 import rdflib
 
 try:
@@ -22,8 +23,16 @@ try:
     xsd = owlready2.get_ontology("https://www.w3.org/2001/XMLSchema#").load()
     kees = owlready2.get_ontology("http://linkeddata.center/kees/v1#").load()
 
+    response: Response = requests.get("https://raw.githubusercontent.com/FnOio/fnoio.github.io/master/ontology/0.4.1/function.ttl")
+    if response.status_code != 200:
+        raise FileNotFoundError
+    
+    ontology: str = response.text 
+    
     G = rdflib.Graph()
-    open("function.xml", "w").write(G.load(io.StringIO(requests.get("https://raw.githubusercontent.com/FnOio/fnoio.github.io/master/ontology/0.4.1/function.ttl").text), format="turtle").serialize(format="xml"))
+
+    with open("function.xml", "w") as f:
+        f.write(G.load(io.StringIO(ontology), format="turtle").serialize(format="xml"))
 
     fno = owlready2.get_ontology("function.xml").load()
     # fno.base_iri="https://w3id.org/function/ontology#"
