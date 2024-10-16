@@ -273,7 +273,7 @@ class InputParameter:
     raw_line: str
     name: str
     default_value: Any
-    python_type: type
+    python_type: str # cannot use type here because it cannot be serialized
     comment: str
     owl_type: Optional[str] = None
     extra_ttl: Optional[str] = None
@@ -484,7 +484,7 @@ class NotebookAdapter:
             par = InputParameter(raw_line = par_detail['raw_line'],
                                  name = par_detail['varname'],
                                  default_value = par_detail['value'],
-                                 python_type = python_type,
+                                 python_type = python_type.__name__,
                                  comment = par_detail['comment'],
                                  owl_type = parsed_comment.get('owl_type', None),
                                  extra_ttl = parsed_comment.get('extra_ttl', None),
@@ -1104,7 +1104,6 @@ def validate_oda_dispatcher(nba: NotebookAdapter, optional=True, machine_readabl
                         nba.extract_output_declarations())
 
         output = nba.extract_output()
-
         logger.debug(json.dumps(output, indent=4))
 
         class MockRes:
