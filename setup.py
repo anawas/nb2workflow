@@ -6,7 +6,7 @@ if {'pytest', 'test', 'ptr'}.intersection(sys.argv):
     setup_requires.append('pytest-runner')
 
 setup(name='nb2workflow',
-      version = '1.3.93',
+      version = '1.3.94',
       description='convert notebook to workflow',
       author='Volodymyr Savchenko',
       author_email='contact@volodymyrsavchenko.com',
@@ -69,7 +69,6 @@ setup(name='nb2workflow',
             'Jinja2'
         ],
         'galaxy':[
-            'ensureconda',
             'bibtexparser >= 2.0.0b3',
             'pypandoc_binary',
             'black',
