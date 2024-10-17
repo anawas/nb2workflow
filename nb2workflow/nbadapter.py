@@ -1106,6 +1106,9 @@ def validate_oda_dispatcher(nba: NotebookAdapter, optional=True, machine_readabl
         output = nba.extract_output()
         logger.debug(json.dumps(output, indent=4))
 
+        if len(output) == 0:
+            raise ValueError("There is no output here")
+        
         class MockRes:
             @staticmethod
             def json():
@@ -1122,7 +1125,7 @@ def validate_oda_dispatcher(nba: NotebookAdapter, optional=True, machine_readabl
         for parameter in dispatcher_parameters:
             logger.info("\033[32mODA dispatcher parameter \033[0m: %s", parameter)
 
-        prod_list = nbpq.build_product_list(instrument=None, res=MockRes, out_dir=None)
+        prod_list = nbpq.build_product_list(instrument=None, res=MockRes.json(), out_dir=None)
 
         for prod in prod_list:
             logger.info("\033[33mworkflow the output produces ODA product \033[0m: \033[31m%s\033[0m (%s) %s", prod.name, prod.type_key, prod)
