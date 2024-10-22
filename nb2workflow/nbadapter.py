@@ -1104,10 +1104,10 @@ def validate_oda_dispatcher(nba: NotebookAdapter, optional=True, machine_readabl
                         nba.extract_output_declarations())
 
         output = nba.extract_output()
-        logger.debug(json.dumps(output, indent=4))
-
         if len(output) == 0:
             raise ValueError("There is no output here")
+
+        logger.debug(json.dumps(output, indent=4))
         
         class MockRes:
             @staticmethod
