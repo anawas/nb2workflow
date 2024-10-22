@@ -1127,6 +1127,9 @@ def validate_oda_dispatcher(nba: NotebookAdapter, optional=True, machine_readabl
                                 oda_ontology_path)
 
         output = nba.extract_output()
+        if len(output) == 0:
+            raise ValueError("There is no output here")
+
         logger.debug(json.dumps(output, indent=4))
         
         class MockRes:
