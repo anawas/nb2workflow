@@ -1,11 +1,10 @@
-import pkg_resources
+import importlib.metadata
 
 name = "nb2workflow"
 
 def version(print_it=True):
-    v = pkg_resources.get_distribution("nb2workflow").version
+    v = importlib.metadata.version("nb2workflow")
     if print_it:
         print(v)
-
+    
     return v
-
