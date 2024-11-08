@@ -394,11 +394,17 @@ class NotebookAdapter:
         return ''
     
     def parse_source_multiline(self, source: str) -> dict[str, list[dict]]:
+        """
+        Extracts assignments and ontology strings from a cell.
+        Assignments are in the form of T1='2024-02-03', whereas ontology strings are what follows, e.g.
+        # http://odahub.io/ontology#AngleDegrees
+        """
         result = {'assign': [], 
                   'standalone': []}
         
         tokens = generate_tokens(io.StringIO(source).readline)
         comments = []
+        # Tokens beginning with # are a comment. Here they mark the onotolgy.
         for token in tokens:
             if token.type == COMMENT:
                 comments.append(token)

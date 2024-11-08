@@ -2,6 +2,7 @@ import re
 import uuid
 import logging
 import rdflib
+import traceback 
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,7 @@ def understand_comment_references(comment, base_uri=None, fallback_type=None) ->
             parsed = parse_ttl(prefixes_in_string + "\n"*3 + variation, base_uri, deduce_type)
             logger.info("this variation WAS parsed: %s to %s", variation, parsed)
         except (rdflib.plugins.parsers.notation3.BadSyntax, NotImplementedError, IndexError) as e:
+            print(traceback.format_exc())
             logger.info("this variation could not be parsed: %s due to %s", variation, e)
             parse_failures.append([variation, e])
 
@@ -78,12 +80,14 @@ def understand_comment_references(comment, base_uri=None, fallback_type=None) ->
         return parsed    
 
 
-
-    
 def parse_ttl(combined_ttl, param_uri, deduce_type=True):
     # here there is some simplification with respect to owl meaning of subclasses and their predicates
     logger.info("input combined turtle: %s", combined_ttl)
 
+    # This is a hotfix to make the code run. Turtle ontology must be triples. This is violated by
+    # the last entry.
+    # The line should not be necessary. the combined ttl expresion must be passed correctly .
+    combined_ttl += " ."
     G = rdflib.Graph()
     G.bind("oda", oda)
     G.bind("unit", unit)
