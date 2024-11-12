@@ -87,7 +87,7 @@ def parse_ttl(combined_ttl, param_uri, deduce_type=True):
     # This is a hotfix to make the code run. Turtle ontology must be triples. This is violated by
     # the last entry.
     # The line should not be necessary. the combined ttl expresion must be passed correctly .
-    combined_ttl += " .\n"
+    combined_ttl += ' oda:hasValue "2024-11-12T10:00:00"^^xsd:dateTime .\n'
     G = rdflib.Graph()
     G.bind("oda", oda)
     G.bind("unit", unit)
@@ -100,6 +100,9 @@ def parse_ttl(combined_ttl, param_uri, deduce_type=True):
     limits_inference(G, param_uri)    
    
     owl_types = list(G.objects(param_uri, a))
+    if len(owl_types) == 0:
+        raise ValueError("Could not infer owl type")
+    
     predicate_objects = list(G.predicate_objects(param_uri))
     
     logger.info("types: %s", owl_types)
