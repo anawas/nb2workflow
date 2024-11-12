@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import ast
+import ast   # use to process abstract syntax trees
 
 from dataclasses import dataclass, asdict
 from functools import lru_cache, cached_property
@@ -8,7 +8,7 @@ import hashlib
 import os
 import glob
 import shutil
-from tokenize import generate_tokens, COMMENT
+from tokenize import TokenInfo, generate_tokens, COMMENT
 from typing import * # type: ignore 
 # need wildcard import to resolve (semi-)arbitrary ForwardRef of annotations in nb
 import yaml 
@@ -386,11 +386,14 @@ class NotebookAdapter:
         return rdflib.URIRef(f"{oda_prefix}{self.unique_name}")      
     
     @staticmethod
-    def _pop_comment_by_line(comment_tokens, l):
-        for i, x in enumerate(comment_tokens):
-            if x.start[0]==l:
+    def _pop_comment_by_line(comment_tokens: TokenInfo, line_number: int):
+        """ 
+        Removes comment tokens that were parsed from the list
+        """
+        for i, token in enumerate(comment_tokens):
+            if token.start[0]==line_number:
                 res = comment_tokens.pop(i)
-                return res.string[1:]
+                return (res.string[1:]).lstrip()
         return ''
     
     def parse_source_multiline(self, source: str) -> dict[str, list[dict]]:
@@ -454,15 +457,23 @@ class NotebookAdapter:
             
         # now parse full-line comments
         for comment in comments:
-            cstring = comment.string[1:]
+            cstring = (comment.string[1:]).lstrip()
             result['standalone'].append(cstring)        
         
         return result
-    
+        
     def extract_parameters_from_cell(self, cell):
+        """
+        Extract the parameters from the cell tagged 'parameters'.
+        The function knows two parameter types:
+        (1) Standalone: single line comment
+        (2) Assign: Something like T1='2024-02-03' # http://odahub.io/ontology#AngleDegrees
+        """
         parameters = {}
         
         parsed_cell = self.parse_source_multiline(cell['source'])
+        # we've extracted all instructions of a cell. Now let's parse 
+        # what we've got.
         for par_detail in parsed_cell['assign']:
             
             # May need to have fallback type to properly parse owl
@@ -490,7 +501,9 @@ class NotebookAdapter:
             par = InputParameter(raw_line = par_detail['raw_line'],
                                  name = par_detail['varname'],
                                  default_value = par_detail['value'],
-                                 python_type = python_type.__name__,
+                                 python_type = python_type,  # This raises TypeError: Object of type type is not JSON serializable
+                                 # python_type = python_type.__name__,  # This works but crashes elsewhere
+                                 # python_type = fallback_type,
                                  comment = par_detail['comment'],
                                  owl_type = parsed_comment.get('owl_type', None),
                                  extra_ttl = parsed_comment.get('extra_ttl', None),
@@ -516,6 +529,11 @@ class NotebookAdapter:
 
     @lru_cache
     def extract_parameters(self):
+        """
+        Finds cell in notebook tagged either as 'parameters',
+        'system-parameters', or 'injected-parameters'. This cell has
+        the input parameters for the calcuation.
+        """
         nb = self.read()
 
         self.input_parameters = {}
