@@ -67,7 +67,7 @@ def understand_comment_references(comment, base_uri=None, fallback_type=None) ->
             logger.info("this variation WAS parsed: %s to %s", variation, parsed)
         except (rdflib.plugins.parsers.notation3.BadSyntax, NotImplementedError, IndexError) as e:
             print(traceback.format_exc())
-            logger.info("this variation could not be parsed: %s due to %s", variation, e)
+            logger.error("this variation could not be parsed: %s due to %s", variation, e)            
             parse_failures.append([variation, e])
 
     if parsed is None:
@@ -87,7 +87,7 @@ def parse_ttl(combined_ttl, param_uri, deduce_type=True):
     # This is a hotfix to make the code run. Turtle ontology must be triples. This is violated by
     # the last entry.
     # The line should not be necessary. the combined ttl expresion must be passed correctly .
-    combined_ttl += " ."
+    combined_ttl += " .\n"
     G = rdflib.Graph()
     G.bind("oda", oda)
     G.bind("unit", unit)
