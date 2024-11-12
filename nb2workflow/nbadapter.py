@@ -1,57 +1,51 @@
 from __future__ import annotations
 
-import ast   # use to process abstract syntax trees
-
-from dataclasses import dataclass, asdict
-from functools import lru_cache, cached_property
-import hashlib
-import os
-import glob
-import shutil
-from tokenize import TokenInfo, generate_tokens, COMMENT
-from typing import * # type: ignore 
-# need wildcard import to resolve (semi-)arbitrary ForwardRef of annotations in nb
-import yaml 
-import re
-import time
-import tempfile
-import subprocess
-import yaml
 import argparse
-import json
+import ast  # use to process abstract syntax trees
 import base64
-import rdflib
 import copy
-import validators
-import requests
-import random
-import string
+import glob
+import hashlib
 import io
+import json
+import logging
+import os
+import random
+import re
+import shutil
+import string
+import subprocess
+import tempfile
 import threading
+import time
+from dataclasses import asdict, dataclass
+from functools import cached_property, lru_cache
+from threading import Lock
+from tokenize import COMMENT, TokenInfo, generate_tokens
+from typing import *  # type: ignore
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-import papermill as pm
-import scrapbook as sb
-from typeguard import check_type, ForwardRefPolicy, TypeCheckError
 import nbformat
+import papermill as pm
+import rdflib
+import requests
+import scrapbook as sb
+import validators
+# need wildcard import to resolve (semi-)arbitrary ForwardRef of annotations in nb
+import yaml
+from git import GitCommandError, InvalidGitRepositoryError, Repo
 from nbconvert import HTMLExporter
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from oda_api.ontology_helper import Ontology, xsd_type_to_python_type
+from typeguard import ForwardRefPolicy, TypeCheckError, check_type
+
+from nb2workflow.health import current_health
+from nb2workflow.helpers import is_mmoda_url, serialize_workflow_exception
+from nb2workflow.json import CustomJSONEncoder
+from nb2workflow.logging_setup import setup_logging
+from nb2workflow.semantics import understand_comment_references
+from nb2workflow.sentry import sentry
 
 from . import logstash
-
-from oda_api.ontology_helper import Ontology, xsd_type_to_python_type
-
-from nb2workflow.sentry import sentry
-from nb2workflow.health import current_health
-from nb2workflow.logging_setup import setup_logging
-from nb2workflow.json import CustomJSONEncoder
-from nb2workflow.helpers import is_mmoda_url, serialize_workflow_exception
-from nb2workflow.semantics import understand_comment_references
-
-from nb2workflow.semantics import understand_comment_references
-from git import Repo, InvalidGitRepositoryError, GitCommandError
-
-import logging
-from threading import Lock
 
 logger=logging.getLogger(__name__)
 
