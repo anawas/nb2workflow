@@ -120,6 +120,12 @@ def cast_parameter(x,par):
 
 
 def odahub_type_for_python_type(python_type: type):
+    """
+    Converts the Python type of an assignment to an ontology. 
+    The assignment for T1 
+    "T1='2022-10-22T05:18:22' # http://odahub.io/ontology#StartTime"
+    is converted to <http://www.w3.org/2001/XMLSchema#String>.
+    """
     out_type = python_type.__name__
 
     xml_scheme_url = "http://www.w3.org/2001/XMLSchema#"

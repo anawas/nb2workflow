@@ -51,6 +51,10 @@ def understand_comment_references(
     parsed = None
     parse_failures = []
 
+    # These variations of turte syntax are here for convenience.
+    # We don't enforce a certain format of the onotlogy in the notebook.
+    # Thus the user doesn't need to know the correct syntax.
+    # We try to match as much variants as possible.
     variations = [
         f"{comment}",
         f"{base_uri.n3()} a {comment} .",
@@ -67,11 +71,15 @@ def understand_comment_references(
 
     for variation in variations:
         try:
+            # Here we try if the ontology given by the user matches
+            # one of the variants. We choose the last one.
             parsed = parse_ttl(prefixes_in_string + "\n"*3 + variation, base_uri, deduce_type)
             logger.info("this variation WAS parsed: %s to %s", variation, parsed)
         except (rdflib.plugins.parsers.notation3.BadSyntax, NotImplementedError, IndexError) as e:
-            print(traceback.format_exc())
-            logger.error("this variation could not be parsed: %s due to %s", variation, e)
+            # If we're here the user's ontology did not match the variant.
+            # This is not bad as long as there are more to try.
+            # We just log the fail.
+            logger.warning("this variation could not be parsed: %s due to %s", variation, e)
             parse_failures.append([variation, e])
 
     if parsed is None:
@@ -85,13 +93,10 @@ def understand_comment_references(
 
 
 def parse_ttl(combined_ttl, param_uri, deduce_type=True):
-    # here there is some simplification with respect to owl meaning of subclasses and their predicates
+    # here there is some simplification with respect to owl meaning of 
+    # subclasses and their predicates
     logger.info("input combined turtle: %s", combined_ttl)
 
-    # This is a hotfix to make the code run. Turtle ontology must be triples. This is violated by
-    # the last entry.
-    # The line should not be necessary. the combined ttl expresion must be passed correctly .
-    combined_ttl += ' oda:hasValue "2024-11-12T10:00:00"^^xsd:dateTime .\n'
     G = rdflib.Graph()
     G.bind("oda", oda)
     G.bind("unit", unit)
@@ -104,6 +109,8 @@ def parse_ttl(combined_ttl, param_uri, deduce_type=True):
     limits_inference(G, param_uri)
 
     owl_types = list(G.objects(param_uri, a))
+    # owl_types = list(G.objects())
+
     if len(owl_types) == 0:
         raise ValueError("Could not infer owl type")
 
