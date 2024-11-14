@@ -28,9 +28,13 @@ subClassOf = rdfs['subClassOf']
 
 # TODO: register this function as versioned rdf-generating workflow
 def understand_comment_references(
-        comment, base_uri=None,
-        fallback_type=None
+        comment: str, base_uri: str=None,
+        fallback_type: str=None
 ) -> dict:
+    """ Main purpose of this function is to understand the onology that the
+        user added as a comment string. Understanding means, it tries to
+        extract subject, predicate and object from the string.
+    """
     if base_uri is None:
         base_uri = oda[uuid.uuid1().hex]
         deduce_type = True
@@ -78,7 +82,7 @@ def understand_comment_references(
         except (rdflib.plugins.parsers.notation3.BadSyntax, NotImplementedError, IndexError) as e:
             # If we're here the user's ontology did not match the variant.
             # This is not bad as long as there are more to try.
-            # We just log the fail.
+            # We just log the fail for debugging.
             logger.warning("this variation could not be parsed: %s due to %s", variation, e)
             parse_failures.append([variation, e])
 
@@ -92,7 +96,13 @@ def understand_comment_references(
         return parsed
 
 
-def parse_ttl(combined_ttl, param_uri, deduce_type=True):
+def parse_ttl(combined_ttl: str, param_uri: str, deduce_type: bool=True):
+    """ This function tries to parse the ttl string given in the argument. 
+        It uses functionality from the rdflib package. 
+        On success, it returns the owl type deduced from the ttl string.
+        On fail, it raises an rdflib.plugins.parsers.notation3.BadSyntax
+        exception.
+    """
     # here there is some simplification with respect to owl meaning of 
     # subclasses and their predicates
     logger.info("input combined turtle: %s", combined_ttl)
