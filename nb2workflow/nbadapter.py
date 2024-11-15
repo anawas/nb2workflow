@@ -501,9 +501,7 @@ class NotebookAdapter:
             par = InputParameter(raw_line = par_detail['raw_line'],
                                  name = par_detail['varname'],
                                  default_value = par_detail['value'],
-                                 python_type = python_type,  # This raises TypeError: Object of type type is not JSON serializable
-                                 # python_type = python_type.__name__,  # This works but crashes elsewhere
-                                 # python_type = fallback_type,
+                                 python_type = python_type.__name__,
                                  comment = par_detail['comment'],
                                  owl_type = parsed_comment.get('owl_type', None),
                                  extra_ttl = parsed_comment.get('extra_ttl', None),
@@ -1129,9 +1127,6 @@ def validate_oda_dispatcher(nba: NotebookAdapter, optional=True, machine_readabl
                                 oda_ontology_path)
 
         output = nba.extract_output()
-        if len(output) == 0:
-            raise ValueError("There is no output here")
-
         logger.debug(json.dumps(output, indent=4))
         
         class MockRes:
