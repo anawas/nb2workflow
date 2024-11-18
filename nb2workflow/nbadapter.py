@@ -457,7 +457,9 @@ class NotebookAdapter:
             
         # now parse full-line comments
         for comment in comments:
-            cstring = (comment.string[1:]).lstrip()
+            # we remove the first character (#) only.
+            # Whitespaces are stipped later in the code. 
+            cstring = (comment.string[1:])
             result['standalone'].append(cstring)        
         
         return result
