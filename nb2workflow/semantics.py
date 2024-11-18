@@ -79,7 +79,7 @@ def understand_comment_references(
             # one of the variants. We choose the last one.
             parsed = parse_ttl(prefixes_in_string + "\n"*3 + variation, base_uri, deduce_type)
             logger.info("this variation WAS parsed: %s to %s", variation, parsed)
-        except (rdflib.plugins.parsers.notation3.BadSyntax, NotImplementedError, IndexError) as e:
+        except (rdflib.plugins.parsers.notation3.BadSyntax, NotImplementedError, IndexError, Exception) as e:
             # If we're here the user's ontology did not match the variant.
             # This is not bad as long as there are more to try.
             # We just log the fail for debugging.
@@ -122,7 +122,7 @@ def parse_ttl(combined_ttl: str, param_uri: str, deduce_type: bool=True):
     # owl_types = list(G.objects())
 
     if len(owl_types) == 0:
-        raise ValueError("Could not infer owl type")
+        raise ValueError(f"Could not infer owl type for ttl {combined_ttl}")
 
     predicate_objects = list(G.predicate_objects(param_uri))
 
