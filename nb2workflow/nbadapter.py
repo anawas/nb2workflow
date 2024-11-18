@@ -1130,7 +1130,7 @@ def validate_oda_dispatcher(nba: NotebookAdapter, optional=True, machine_readabl
 
         output = nba.extract_output()
         logger.debug(json.dumps(output, indent=4))
-        
+
         class MockRes:
             headers={'content-type': 'application/json'}
 
